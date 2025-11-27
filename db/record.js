@@ -7,4 +7,13 @@ function generateId() {
   return Date.now();
 }
 
-module.exports = { validateRecord, generateId };
+function createRecord(name, value) {
+  return {
+    id: generateId(),
+    name,
+    value,
+    createdAt: new Date().toISOString()
+  };
+}
+
+module.exports = { validateRecord, generateId, createRecord };
