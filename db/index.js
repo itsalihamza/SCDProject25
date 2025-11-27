@@ -47,4 +47,29 @@ function searchRecords(keyword) {
   });
 }
 
-module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords };
+function sortRecords(field, order) {
+  const data = fileDB.readDB();
+  const sorted = [...data]; // Create a copy to avoid modifying original
+  
+  sorted.sort((a, b) => {
+    let compareA, compareB;
+    
+    if (field === 'name') {
+      compareA = a.name.toLowerCase();
+      compareB = b.name.toLowerCase();
+    } else if (field === 'date') {
+      compareA = a.createdAt || '';
+      compareB = b.createdAt || '';
+    }
+    
+    if (order === 'asc') {
+      return compareA > compareB ? 1 : compareA < compareB ? -1 : 0;
+    } else {
+      return compareA < compareB ? 1 : compareA > compareB ? -1 : 0;
+    }
+  });
+  
+  return sorted;
+}
+
+module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords, sortRecords };
