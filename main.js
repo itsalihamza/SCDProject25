@@ -17,7 +17,8 @@ function menu() {
 5. Search Records
 6. Sort Records
 7. Export Data
-8. Exit
+8. View Vault Statistics
+9. Exit
 =====================
   `);
 
@@ -120,6 +121,12 @@ function menu() {
         break;
 
       case '8':
+        const statistics = db.getStatistics();
+        console.log(statistics);
+        menu();
+        break;
+
+      case '9':
         console.log('👋 Exiting NodeVault...');
         rl.close();
         break;

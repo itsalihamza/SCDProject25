@@ -3,6 +3,8 @@ const recordUtils = require('./record');
 const vaultEvents = require('../events');
 const { exportToFile } = require('../utils/export');
 const { createBackup } = require('../utils/backup');
+const { calculateStatistics, formatStatistics } = require('../utils/statistics');
+const path = require('path');
 
 function addRecord({ name, value }) {
   recordUtils.validateRecord({ name, value });
@@ -90,4 +92,11 @@ function exportData() {
   return filePath;
 }
 
-module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords, sortRecords, exportData };
+function getStatistics() {
+  const data = fileDB.readDB();
+  const vaultPath = path.join(__dirname, '..', 'data', 'vault.json');
+  const stats = calculateStatistics(data, vaultPath);
+  return formatStatistics(stats);
+}
+
+module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords, sortRecords, exportData, getStatistics };
