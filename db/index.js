@@ -1,6 +1,7 @@
 const fileDB = require('./file');
 const recordUtils = require('./record');
 const vaultEvents = require('../events');
+const { exportToFile } = require('../utils/export');
 
 function addRecord({ name, value }) {
   recordUtils.validateRecord({ name, value });
@@ -72,4 +73,10 @@ function sortRecords(field, order) {
   return sorted;
 }
 
-module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords, sortRecords };
+function exportData() {
+  const data = fileDB.readDB();
+  const filePath = exportToFile(data);
+  return filePath;
+}
+
+module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords, sortRecords, exportData };
