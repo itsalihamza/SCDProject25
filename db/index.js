@@ -1,4 +1,4 @@
-const fileDB = require('./file');
+const mongodb = require('./mongodb');
 const recordUtils = require('./record');
 const vaultEvents = require('../events');
 const { exportToFile } = require('../utils/export');
@@ -6,63 +6,53 @@ const { createBackup } = require('../utils/backup');
 const { calculateStatistics, formatStatistics } = require('../utils/statistics');
 const path = require('path');
 
-function addRecord({ name, value }) {
+async function addRecord({ name, value }) {
   recordUtils.validateRecord({ name, value });
-  const data = fileDB.readDB();
   const newRecord = recordUtils.createRecord(name, value);
-  data.push(newRecord);
-  fileDB.writeDB(data);
+  
+  await mongodb.insertRecord(newRecord);
   
   // Create automatic backup
-  const backup = createBackup(data);
+  const allData = await mongodb.findAllRecords();
+  const backup = createBackup(allData);
   vaultEvents.emit('recordAdded', newRecord);
   vaultEvents.emit('backupCreated', backup);
   
   return newRecord;
 }
 
-function listRecords() {
-  return fileDB.readDB();
+async function listRecords() {
+  return await mongodb.findAllRecords();
 }
 
-function updateRecord(id, newName, newValue) {
-  const data = fileDB.readDB();
-  const record = data.find(r => r.id === id);
-  if (!record) return null;
-  record.name = newName;
-  record.value = newValue;
-  fileDB.writeDB(data);
-  vaultEvents.emit('recordUpdated', record);
+async function updateRecord(id, newName, newValue) {
+  const updates = { name: newName, value: newValue };
+  const record = await mongodb.updateRecordById(id, updates);
+  if (record) {
+    vaultEvents.emit('recordUpdated', record);
+  }
   return record;
 }
 
-function deleteRecord(id) {
-  let data = fileDB.readDB();
-  const record = data.find(r => r.id === id);
+async function deleteRecord(id) {
+  const record = await mongodb.deleteRecordById(id);
   if (!record) return null;
-  data = data.filter(r => r.id !== id);
-  fileDB.writeDB(data);
   
   // Create automatic backup
-  const backup = createBackup(data);
+  const allData = await mongodb.findAllRecords();
+  const backup = createBackup(allData);
   vaultEvents.emit('recordDeleted', record);
   vaultEvents.emit('backupCreated', backup);
   
   return record;
 }
 
-function searchRecords(keyword) {
-  const data = fileDB.readDB();
-  const lowerKeyword = keyword.toLowerCase();
-  return data.filter(record => {
-    const nameMatch = record.name.toLowerCase().includes(lowerKeyword);
-    const idMatch = record.id.toString().includes(keyword);
-    return nameMatch || idMatch;
-  });
+async function searchRecords(keyword) {
+  return await mongodb.searchRecords(keyword);
 }
 
-function sortRecords(field, order) {
-  const data = fileDB.readDB();
+async function sortRecords(field, order) {
+  const data = await mongodb.findAllRecords();
   const sorted = [...data]; // Create a copy to avoid modifying original
   
   sorted.sort((a, b) => {
@@ -86,17 +76,21 @@ function sortRecords(field, order) {
   return sorted;
 }
 
-function exportData() {
-  const data = fileDB.readDB();
+async function exportData() {
+  const data = await mongodb.findAllRecords();
   const filePath = exportToFile(data);
   return filePath;
 }
 
-function getStatistics() {
-  const data = fileDB.readDB();
-  const vaultPath = path.join(__dirname, '..', 'data', 'vault.json');
-  const stats = calculateStatistics(data, vaultPath);
+async function getStatistics() {
+  const data = await mongodb.findAllRecords();
+  // For MongoDB, we'll use current time as last modified
+  const stats = calculateStatistics(data, null);
   return formatStatistics(stats);
 }
 
-module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords, sortRecords, exportData, getStatistics };
+async function closeConnection() {
+  await mongodb.disconnect();
+}
+
+module.exports = { addRecord, listRecords, updateRecord, deleteRecord, searchRecords, sortRecords, exportData, getStatistics, closeConnection };

@@ -1,0 +1,15 @@
+{
+  "name": "nodevault",
+  "version": "1.0.0",
+  "description": "NodeVault - A CLI-based record management system with MongoDB",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "keywords": ["vault", "cli", "mongodb", "crud"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  }
+}
