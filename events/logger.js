@@ -11,3 +11,7 @@ vaultEvents.on('recordUpdated', record => {
 vaultEvents.on('recordDeleted', record => {
   console.log(`[EVENT] Record deleted: ID ${record.id}, Name: ${record.name}`);
 });
+
+vaultEvents.on('backupCreated', backup => {
+  console.log(`[BACKUP] Backup created successfully: ${backup.filename}`);
+});
