@@ -1,9 +1,16 @@
 const { MongoClient } = require('mongodb');
+require('dotenv').config();
 
-// Hardcoded MongoDB connection string (will be moved to .env in next version)
-const MONGO_URI = 'mongodb://localhost:27017';
-const DB_NAME = 'nodevault';
-const COLLECTION_NAME = 'records';
+// Load configuration from environment variables
+const MONGO_URI = process.env.MONGO_URI;
+const DB_NAME = process.env.DB_NAME || 'nodevault';
+const COLLECTION_NAME = process.env.COLLECTION_NAME || 'records';
+
+// Validate required environment variables
+if (!MONGO_URI) {
+  console.error('❌ Error: MONGO_URI is not defined in .env file');
+  process.exit(1);
+}
 
 let client = null;
 let db = null;

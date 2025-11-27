@@ -1,3 +1,4 @@
+require('dotenv').config();
 const readline = require('readline');
 const db = require('./db');
 require('./events/logger'); // Initialize event logger
