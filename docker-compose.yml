@@ -1,36 +1,36 @@
-version: '3.8'
+version: "3.9"
 
 services:
   mongodb:
     image: mongo:latest
-    container_name: nodevault-mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    environment:
-      - MONGO_INITDB_DATABASE=nodevault
+    container_name: mongodb
+    restart: unless-stopped
+    env_file:
+      - .env
     networks:
-      - nodevault-network
+      - nodevault-net
+    volumes:
+      - mongo-data:/data/db
+    # Do not publish ports → keeps MongoDB private
 
-  app:
-    build: .
-    container_name: nodevault-app
+  backend:
+    image: itsalihamza133/my-backend-app:latest
+    container_name: backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - nodevault-net
+    ports:
+      - "3000:3000"  # expose backend port if needed for web interface or testing
     depends_on:
       - mongodb
-    environment:
-      - MONGO_URI=mongodb://mongodb:27017
-      - DB_NAME=nodevault
-      - COLLECTION_NAME=records
-      - NODE_ENV=production
-    stdin_open: true
-    tty: true
-    networks:
-      - nodevault-network
-
-volumes:
-  mongodb_data:
+    tty: true      # allocates terminal
+    stdin_open: true  # keeps stdin open for interactive CLI
 
 networks:
-  nodevault-network:
+  nodevault-net:
     driver: bridge
+
+volumes:
+  mongo-data:
