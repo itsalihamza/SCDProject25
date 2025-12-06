@@ -5,7 +5,7 @@ npm-debug.log
 .gitignore
 backups
 export.txt
-data/vault.json
+data
 *.md
 .vscode
 .idea
